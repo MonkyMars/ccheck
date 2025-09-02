@@ -17,7 +17,7 @@ To install Cchecker, you need to have Go installed on your machine. Then, you ca
 ```bash
 git clone git@github.com:MonkyMars/ccheck.git
 cd ccheck
-go build -o cchecker .
+go build -o ccheck .
 ```
 
 The cchecker binary will be created in the current directory.
