@@ -23,7 +23,7 @@ The cchecker binary will be created in the current directory.
 ## Usage
 You can run Cchecker from the command line with the following syntax:
 ```bash
-./cchecker <pattern> <root> <file_extension>
+./ccheck <pattern> <root> <file_extension>
 ```
 
 - `<pattern>`: The keyword or phrase you want to check for.
@@ -32,7 +32,7 @@ You can run Cchecker from the command line with the following syntax:
 
 Example:
 ```bash
-./cchecker "TODO" ~/Coding ".go"
+./ccheck "TODO" ~/Coding ".go"
 ```
 
 Output:
