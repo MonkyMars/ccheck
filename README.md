@@ -5,6 +5,8 @@ Cchecker is a command-line tool that checks for specific content in files or dir
 
 ## Features
 - Check for the presence of specific keywords in files.
+- Supports regex patterns.
+- Case-sensitive and case-insensitive search options.
 - Recursively check directories.
 - Supports wildcard ("*") or specific file extensions (e.g., ".go", ".txt").
 - Outputs results to the console.
@@ -23,16 +25,21 @@ The cchecker binary will be created in the current directory.
 ## Usage
 You can run Cchecker from the command line with the following syntax:
 ```bash
-./ccheck <pattern> <root> <file_extension>
+./ccheck <pattern> <root> <file_extension> <flags>
 ```
 
 - `<pattern>`: The keyword or phrase you want to check for.
 - `<root>`: The root directory to start the check.
 - `<file_extension>`: The file extension to filter files (use "*" for all files).
+- `<flags>`: Optional flags for additional functionality. Currently only supports -i for case-insensitive search.
 
 Example:
 ```bash
-./ccheck "TODO" ~/Coding ".go"
+./ccheck "TODO" ~/Coding ".go" -i
+```
+or
+```bash
+./ccheck "re:TODO" ~/Coding ".go" -i
 ```
 
 Output:

@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
+	"ccheck/validate"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
-	"slices"
+	"regexp"
 	"strings"
 )
 
@@ -22,13 +23,13 @@ func main() {
 		}
 
 		if d.IsDir() {
-			if !is_valid_dir(path) {
+			if !validate.Is_valid_dir(path, blacklisted_dirs) {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		if !is_valid_ext(d.Name(), ext) {
+		if !validate.Is_valid_ext(d.Name(), ext) {
 			return nil
 		}
 
@@ -37,17 +38,22 @@ func main() {
 			fmt.Println(print_error(err.Error(), "file should be accessible"))
 			return nil
 		}
-		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
 		lineNum := 1
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			if strings.Contains(line, pattern) {
+			if pattern.MatchString(line) {
 				fmt.Printf("%s:%d: %s\n", path, lineNum, line)
 			}
 			lineNum++
+		}
+
+		file.Close()
+
+		if err := scanner.Err(); err != nil {
+			fmt.Println(print_error(err.Error(), "error reading file"))
 		}
 
 		return nil
@@ -58,29 +64,49 @@ func main() {
 	}
 }
 
-func parse_args() (pattern string, root string, ext string) {
+func parse_args() (pattern *regexp.Regexp, root string, ext string) {
 	if len(os.Args) < 4 {
 		fmt.Println(print_error("not enough arguments", "at least 3 arguments required"))
+		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
 		os.Exit(1)
 	}
-	/// Pattern, root directory file extension
+
+	case_sensitive := true
+	for _, arg := range os.Args[4:] {
+		if arg == "-i" {
+			case_sensitive = false
+		} else {
+			fmt.Println(print_error("unknown flag "+arg, "valid flags are -i"))
+			os.Exit(1)
+		}
+	}
+	var s *regexp.Regexp
+	patternArg := os.Args[1]
+
+	if strings.HasPrefix(patternArg, "re:") {
+		regexPattern := patternArg[3:] // remove "re:"
+		if !case_sensitive {
+			regexPattern = "(?i)" + regexPattern
+		}
+		re, err := regexp.Compile(regexPattern)
+		if err != nil {
+			fmt.Println(print_error(err.Error(), "valid regex"))
+			os.Exit(1)
+		}
+		s = re
+	} else {
+		// Literal search
+		literal := regexp.QuoteMeta(patternArg)
+		if !case_sensitive {
+			literal = "(?i)" + literal
+		}
+		s = regexp.MustCompile(literal)
+	}
+
 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
-	return os.Args[1], os.Args[2], os.Args[3]
+	return s, os.Args[2], os.Args[3]
 }
 
 func print_error(msg string, expected string) string {
 	return fmt.Sprintf("Error: %s, expected: %s", msg, expected)
-}
-
-func is_valid_dir(path string) bool {
-	is_blacklisted_dir := slices.Contains(blacklisted_dirs, filepath.Base(path))
-	is_hiddendir := strings.HasPrefix(filepath.Base(path), ".")
-	return !is_blacklisted_dir && !is_hiddendir
-}
-
-func is_valid_ext(file, ext string) bool {
-	if ext == "*" {
-		return true
-	}
-	return filepath.Ext(file) == ext
 }
