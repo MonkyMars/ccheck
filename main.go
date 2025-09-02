@@ -36,7 +36,6 @@ func main() {
 		if err != nil {
 			fmt.Println(print_error(err.Error(), "file should be accessible"))
 			return nil
-			// TODO: handle error properly
 		}
 		defer file.Close()
 
