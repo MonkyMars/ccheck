@@ -33,6 +33,13 @@ func main() {
 			return nil
 		}
 
+		// Ensure path is inside root
+		rel, err := filepath.Rel(root, path)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			return nil // skip paths outside root
+		}
+
+		// #nosec G304: Path is validated to be inside the root directory
 		file, err := os.Open(path)
 		if err != nil {
 			fmt.Println(print_error(err.Error(), "file should be accessible"))
@@ -50,7 +57,11 @@ func main() {
 			lineNum++
 		}
 
-		file.Close()
+		err = file.Close()
+		if err != nil {
+			fmt.Println(print_error(err.Error(), "file should be closed"))
+			return nil
+		}
 
 		if err := scanner.Err(); err != nil {
 			fmt.Println(print_error(err.Error(), "error reading file"))
