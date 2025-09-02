@@ -1,15 +1,15 @@
 # Cchecker
-# A simple content checker written in Go.
+# A lightweight content checker written in Go.
 
 Cchecker is a command-line tool that checks for specific content in files or directories. It can be used to ensure that certain keywords or phrases are present or absent in your codebase or documents.
 
 ## Features
+- Extremely fast and lightweight.
 - Check for the presence of specific keywords in files.
-- Supports regex patterns.
+- Supports regex patterns (prefix pattern with `re:`).
 - Case-sensitive and case-insensitive search options.
 - Recursively check directories.
 - Supports wildcard ("*") or specific file extensions (e.g., ".go", ".txt").
-- Outputs results to the console.
 - Easy to use with command-line arguments.
 
 ## Installation
