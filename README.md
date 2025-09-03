@@ -44,6 +44,7 @@ or
 
 Output:
 ```
+Cchecker x.y.z
 /home/monky/Coding/go/check/main.go:68: 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
 ```
 

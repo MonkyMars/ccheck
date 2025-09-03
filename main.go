@@ -9,16 +9,18 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 var blacklisted_dirs = []string{"node_modules", "target"}
 
 func main() {
-	pattern, root, ext := parse_args()
+	fmt.Println("Cchecker 1.2.1")
+	pattern, root, ext := parseArgs()
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			fmt.Println(print_error(err.Error(), "file should be accessible"))
+			fmt.Println(printError(err.Error(), "file should be accessible"))
 			return nil
 		}
 
@@ -40,9 +42,9 @@ func main() {
 		}
 
 		// #nosec G304: Path is validated to be inside the root directory
-		file, err := os.Open(path)
+		file, err := openFile(path)
 		if err != nil {
-			fmt.Println(print_error(err.Error(), "file should be accessible"))
+			fmt.Println(printError(err.Error(), "file should be accessible"))
 			return nil
 		}
 
@@ -59,12 +61,12 @@ func main() {
 
 		err = file.Close()
 		if err != nil {
-			fmt.Println(print_error(err.Error(), "file should be closed"))
+			fmt.Println(printError(err.Error(), "file should be closed"))
 			return nil
 		}
 
 		if err := scanner.Err(); err != nil {
-			fmt.Println(print_error(err.Error(), "error reading file"))
+			fmt.Println(printError(err.Error(), "error reading file"))
 		}
 
 		return nil
@@ -75,9 +77,9 @@ func main() {
 	}
 }
 
-func parse_args() (pattern *regexp.Regexp, root string, ext string) {
+func parseArgs() (pattern *regexp.Regexp, root string, ext string) {
 	if len(os.Args) < 4 {
-		fmt.Println(print_error("not enough arguments", "at least 3 arguments required"))
+		fmt.Println(printError("not enough arguments", "at least 3 arguments required"))
 		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
 		os.Exit(1)
 	}
@@ -87,7 +89,7 @@ func parse_args() (pattern *regexp.Regexp, root string, ext string) {
 		if arg == "-i" {
 			case_sensitive = false
 		} else {
-			fmt.Println(print_error("unknown flag "+arg, "valid flags are -i"))
+			fmt.Println(printError("unknown flag "+arg, "valid flags are -i"))
 			os.Exit(1)
 		}
 	}
@@ -101,7 +103,7 @@ func parse_args() (pattern *regexp.Regexp, root string, ext string) {
 		}
 		re, err := regexp.Compile(regexPattern)
 		if err != nil {
-			fmt.Println(print_error(err.Error(), "valid regex"))
+			fmt.Println(printError(err.Error(), "valid regex"))
 			os.Exit(1)
 		}
 		s = re
@@ -118,6 +120,53 @@ func parse_args() (pattern *regexp.Regexp, root string, ext string) {
 	return s, os.Args[2], os.Args[3]
 }
 
-func print_error(msg string, expected string) string {
+func printError(msg string, expected string) string {
 	return fmt.Sprintf("Error: %s, expected: %s", msg, expected)
+}
+
+func isBinaryFile(file *os.File) bool {
+	buf := make([]byte, 8000)
+	n, err := file.Read(buf)
+	if err != nil {
+		return true // unreadable → assume binary
+	}
+	if n == 0 {
+		return false // empty file → treat as text
+	}
+
+	// Look for null bytes
+	for _, b := range buf[:n] {
+		if b == 0 {
+			return true
+		}
+	}
+
+	// Validate UTF-8
+	if !utf8.Valid(buf[:n]) {
+		return true
+	}
+
+	return false
+}
+
+func openFile(path string) (*os.File, error) {
+	// #nosec G304: Path is validated to be inside the root directory
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if isBinaryFile(file) {
+		_ = file.Close()
+		return nil, fmt.Errorf("binary file")
+	}
+
+	// Reset file cursor after binary check
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		_ = file.Close()
+		return nil, err
+	}
+
+	return file, nil
 }
