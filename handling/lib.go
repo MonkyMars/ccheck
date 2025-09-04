@@ -11,9 +11,6 @@ func HandleCaseSensitivityArg() bool {
 	for _, arg := range os.Args[4:] {
 		if arg == "-i" {
 			case_sensitive = false
-		} else {
-			fmt.Println(PrintError("unknown flag "+arg, "valid flags are -i"))
-			os.Exit(1)
 		}
 	}
 	return case_sensitive

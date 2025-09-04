@@ -34,6 +34,11 @@ func main() {
 			return nil
 		}
 
+		// Avoid processing the output file for an infinite loop
+		if path == outputFile.Name() {
+			return nil
+		}
+
 		// Ensure path is inside root
 		rel, err := filepath.Rel(root, path)
 		if err != nil || strings.HasPrefix(rel, "..") {
@@ -42,8 +47,10 @@ func main() {
 
 		// #nosec G304: Path is validated to be inside the root directory
 		file, err := handling.OpenFile(path)
-		if err != nil {
-			fmt.Println(handling.PrintError(err.Error(), "file should be accessible"))
+		if err != nil || file == nil {
+			if err.Error() != "binary file" {
+				fmt.Println(handling.PrintError(err.Error(), "file should be accessible"))
+			}
 			return nil
 		}
 
@@ -55,6 +62,7 @@ func main() {
 			if pattern.MatchString(line) {
 				message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
 				handling.OutputToFile(outputFile, message)
+				fmt.Print(message)
 			}
 			lineNum++
 		}
