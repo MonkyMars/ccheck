@@ -36,7 +36,7 @@ func TestIsValidDir(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := validate.Is_valid_dir(tt.dir, blacklisted_dirs)
+		result := validate.Is_valid_dir(tt.dir, blacklistedDirs)
 		if result != tt.expected {
 			t.Errorf("isValidDir(%q) = %v; want %v", tt.dir, result, tt.expected)
 		}
