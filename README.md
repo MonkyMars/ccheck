@@ -31,7 +31,7 @@ You can run Cchecker from the command line with the following syntax:
 - `<pattern>`: The keyword or phrase you want to check for.
 - `<root>`: The root directory to start the check.
 - `<file_extension>`: The file extension to filter files (use "*" for all files).
-- `<flags>`: Optional flags for additional functionality. Currently only supports -i for case-insensitive search.
+- `<flags>`: Optional flags for additional functionality. Currently only supports -i for case-insensitive search and -o=<file_path> for saving the result to a file.
 
 Example:
 ```bash
@@ -47,6 +47,9 @@ Output:
 Cchecker x.y.z
 /home/monky/Coding/go/check/main.go:68: 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
 ```
+
+> Note:
+- Be careful with setting the root directory to something too broad. For example, using ~/ as the root, will check all your package files too. node_modules for javascript and target for rust are already filtered out by default. You can modify the code to add more directories to ignore if needed.
 
 ## Contributing
 Contributions are welcome! If you find a bug or have a feature request, please open an issue. If you'd like to contribute code, feel free to fork the repository and submit a pull request.

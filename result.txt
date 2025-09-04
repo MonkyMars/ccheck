@@ -1,2 +1,0 @@
-/workspaces/ccheck/main.go:44: 			return nil // skip paths outside root
-
