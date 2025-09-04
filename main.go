@@ -10,8 +10,9 @@ import (
 	"strings"
 )
 
-var blacklistedDirs = []string{"node_modules", "target"}
-var validFlags = []string{"-i", "-o"}
+var (
+	blacklistedDirs = []string{"node_modules", "target"}
+)
 
 func main() {
 	fmt.Println("Cchecker 1.2.1")
