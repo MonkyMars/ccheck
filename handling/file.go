@@ -53,14 +53,17 @@ func OpenFile(path string) (*os.File, error) {
 	return file, nil
 }
 
-func OutputToFile(outputFile *os.File, message string) {
+func OutputToFile(outputFile *os.File, results chan string) {
 	if outputFile != nil {
-		_, err := outputFile.WriteString(message + "\n")
-		if err != nil {
-			PrintError(err.Error(), "output file should be writable")
-			os.Exit(1)
+		for result := range results {
+			_, err := outputFile.WriteString(result)
+			if err != nil {
+				fmt.Println(PrintError(err.Error(), "error writing to file"))
+			}
 		}
 	} else {
-		fmt.Println(message)
+		for result := range results {
+			fmt.Print(result)
+		}
 	}
 }
