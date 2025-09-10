@@ -9,10 +9,7 @@ import (
 )
 
 func HandleCaseSensitivityArg() bool {
-	if slices.Contains(os.Args[4:], "-i") {
-		return false
-	}
-	return true
+	return !slices.Contains(os.Args[4:], "-i")
 }
 
 func HandleOutputFileArg(args []string) (*os.File, error) {
