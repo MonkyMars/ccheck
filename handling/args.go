@@ -15,7 +15,11 @@ func ParseArgs() (pattern *regexp.Regexp, root string, extList []string, outputF
 	}
 
 	case_sensitive := HandleCaseSensitivityArg()
-	outputFile = HandleOutputFileArg()
+	outputFile, err := HandleOutputFileArg(os.Args[4:])
+	if err != nil {
+		fmt.Println(PrintError(err.Error(), "valid output file argument"))
+		os.Exit(1)
+	}
 	var s *regexp.Regexp
 	patternArg := os.Args[1]
 

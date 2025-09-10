@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"path/filepath"
 )
 
 func HandleCaseSensitivityArg() bool {
@@ -16,21 +17,33 @@ func HandleCaseSensitivityArg() bool {
 	return case_sensitive
 }
 
-func HandleOutputFileArg() *os.File {
-	for _, arg := range os.Args[4:] {
+func HandleOutputFileArg(args []string) (*os.File, error) {
+	for _, arg := range args {
 		if strings.HasPrefix(arg, "-o") {
 			parts := strings.SplitN(arg, "=", 2)
 			if len(parts) != 2 || parts[1] == "" {
-				fmt.Println(PrintError("invalid output file argument", "-o=output.txt"))
-				os.Exit(1)
+				return nil, fmt.Errorf("invalid output file argument, expected -o=output.txt, got %s", arg)
 			}
-			outputFile, err := os.Create(parts[1])
+
+			// Validate the file path
+			outputFilePath := parts[1]
+
+			// Ensure the directory exists (if not, return an error)
+			dir := filepath.Dir(outputFilePath)
+			if _, err := os.Stat(dir); os.IsNotExist(err) {
+				return nil, fmt.Errorf("directory %s does not exist", dir)
+			}
+
+			// Try to create the output file
+			outputFile, err := os.Create(outputFilePath)
 			if err != nil {
-				fmt.Println(PrintError(err.Error(), "output file should be creatable"))
-				os.Exit(1)
+				return nil, fmt.Errorf("unable to create output file %s: %v", outputFilePath, err)
 			}
-			return outputFile
+
+			// Return the created file pointer
+			return outputFile, nil
 		}
 	}
-	return nil
+	// Return nil and no error if no output argument is found
+	return nil, nil
 }
