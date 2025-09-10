@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseArgs() (pattern *regexp.Regexp, root string, extList []string, outputFile *os.File) {
+func ParseArgs() (pattern []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
 	if len(os.Args) < 4 {
 		fmt.Println(PrintError("not enough arguments", "at least 3 arguments required"))
 		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
@@ -20,27 +20,33 @@ func ParseArgs() (pattern *regexp.Regexp, root string, extList []string, outputF
 		fmt.Println(PrintError(err.Error(), "valid output file argument"))
 		os.Exit(1)
 	}
-	var s *regexp.Regexp
-	patternArg := os.Args[1]
-
-	if strings.HasPrefix(patternArg, "re:") {
-		regexPattern := patternArg[3:] // remove "re:"
-		if !case_sensitive {
-			regexPattern = "(?i)" + regexPattern
+	var s []*regexp.Regexp
+	patternsArg := os.Args[1]
+	patternList := strings.SplitSeq(patternsArg, ",")
+	for patternsArg := range patternList {
+		patternsArg = strings.TrimSpace(patternsArg)
+		if patternsArg == "" {
+			continue
 		}
-		re, err := regexp.Compile(regexPattern)
-		if err != nil {
-			fmt.Println(PrintError(err.Error(), "valid regex"))
-			os.Exit(1)
+		if strings.HasPrefix(patternsArg, "re:") {
+			regexPattern := patternsArg[3:] // remove "re:"
+			if !case_sensitive {
+				regexPattern = "(?i)" + regexPattern
+			}
+			re, err := regexp.Compile(regexPattern)
+			if err != nil {
+				fmt.Println(PrintError(err.Error(), "valid regex"))
+				os.Exit(1)
+			}
+			s = append(s, re)
+		} else {
+			// Literal search
+			literal := regexp.QuoteMeta(patternsArg)
+			if !case_sensitive {
+				literal = "(?i)" + literal
+			}
+			s = append(s, regexp.MustCompile(literal))
 		}
-		s = re
-	} else {
-		// Literal search
-		literal := regexp.QuoteMeta(patternArg)
-		if !case_sensitive {
-			literal = "(?i)" + literal
-		}
-		s = regexp.MustCompile(literal)
 	}
 
 	root = os.Args[2]

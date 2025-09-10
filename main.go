@@ -88,10 +88,13 @@ func main() {
 
 			for scanner.Scan() {
 				line := scanner.Text()
-				if pattern.MatchString(line) {
-					message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
-					results <- message
-					resultsLen++
+				for _, p := range pattern {
+					if p.MatchString(line) {
+						message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
+						results <- message
+						resultsLen++
+						break // No need to check other patterns if one matches
+					}
 				}
 				lineNum++
 			}
