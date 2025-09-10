@@ -3,8 +3,8 @@ package handling
 import (
 	"fmt"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 )
 
 func HandleCaseSensitivityArg() bool {
