@@ -13,23 +13,26 @@ import (
 )
 
 var (
-	blacklistedDirs = []string{"node_modules", "target"}
+	blacklistedDirs = []string{"node_modules", "target", ".git"}
 	results         = make(chan string)
 	resultsLen      = 0
 )
 
 func main() {
-	fmt.Println("ccheck 2.0.0")
-	pattern, root, ext, outputFile := handling.ParseArgs()
+	fmt.Println("ccheck 2.1.0")
+	pattern, root, extList, outputFile := handling.ParseArgs()
 
 	startTime := time.Now()
 
 	var wg sync.WaitGroup
 	var outputWg sync.WaitGroup
 
-	outputWg.Go(func() {
+	// Use outputWg to track the file output goroutine
+	outputWg.Add(1)
+	go func() {
+		defer outputWg.Done()
 		handling.OutputToFile(outputFile, results)
-	})
+	}()
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -44,7 +47,14 @@ func main() {
 			return nil
 		}
 
-		if !validate.Is_valid_ext(d.Name(), ext) {
+		matches := false
+		for _, e := range extList {
+			if validate.Is_valid_ext(d.Name(), e) {
+				matches = true
+				break
+			}
+		}
+		if !matches {
 			return nil
 		}
 

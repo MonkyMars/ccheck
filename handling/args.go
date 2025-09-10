@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseArgs() (pattern *regexp.Regexp, root string, ext string, outputFile *os.File) {
+func ParseArgs() (pattern *regexp.Regexp, root string, extList []string, outputFile *os.File) {
 	if len(os.Args) < 4 {
 		fmt.Println(PrintError("not enough arguments", "at least 3 arguments required"))
 		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
@@ -15,7 +15,11 @@ func ParseArgs() (pattern *regexp.Regexp, root string, ext string, outputFile *o
 	}
 
 	case_sensitive := HandleCaseSensitivityArg()
-	outputFile = HandleOutputFileArg()
+	outputFile, err := HandleOutputFileArg(os.Args[4:])
+	if err != nil {
+		fmt.Println(PrintError(err.Error(), "valid output file argument"))
+		os.Exit(1)
+	}
 	var s *regexp.Regexp
 	patternArg := os.Args[1]
 
@@ -39,6 +43,25 @@ func ParseArgs() (pattern *regexp.Regexp, root string, ext string, outputFile *o
 		s = regexp.MustCompile(literal)
 	}
 
+	root = os.Args[2]
+	if root == "." {
+		cwd, err := os.Getwd()
+		if err != nil {
+			fmt.Println(PrintError(err.Error(), "get current working directory"))
+			os.Exit(1)
+		}
+		root = cwd
+	}
+
+	ext := os.Args[3]
+	extList = strings.Split(ext, ",")
+	for i, e := range extList {
+		extList[i] = strings.TrimSpace(e)
+		if !strings.HasPrefix(extList[i], ".") {
+			extList[i] = "." + extList[i]
+		}
+	}
+
 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
-	return s, os.Args[2], os.Args[3], outputFile
+	return s, root, extList, outputFile
 }
