@@ -35,6 +35,9 @@ func HandleOutputFileArg(args []string) (*os.File, error) {
 			}
 
 			// Try to create the output file
+			if strings.Contains(outputFilePath, "..") || filepath.IsAbs(outputFilePath) {
+				return nil, fmt.Errorf("invalid output file path")
+			}
 			outputFile, err := os.Create(outputFilePath)
 			if err != nil {
 				return nil, fmt.Errorf("unable to create output file %s: %v", outputFilePath, err)

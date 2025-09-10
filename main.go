@@ -47,10 +47,6 @@ func main() {
 			return nil
 		}
 
-		// if !validate.Is_valid_ext(d.Name(), ext) {
-		// 	return nil
-		// }
-
 		matches := false
 		for _, e := range extList {
 			if validate.Is_valid_ext(d.Name(), e) {
