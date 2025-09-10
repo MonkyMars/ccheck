@@ -4,17 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
 func HandleCaseSensitivityArg() bool {
-	case_sensitive := true
-	for _, arg := range os.Args[4:] {
-		if arg == "-i" {
-			case_sensitive = false
-		}
+	if slices.Contains(os.Args[4:], "-i") {
+		return false
 	}
-	return case_sensitive
+	return true
 }
 
 func HandleOutputFileArg(args []string) (*os.File, error) {
@@ -25,28 +23,34 @@ func HandleOutputFileArg(args []string) (*os.File, error) {
 				return nil, fmt.Errorf("invalid output file argument, expected -o=output.txt, got %s", arg)
 			}
 
-			// Validate the file path
 			outputFilePath := parts[1]
+			cleanPath := filepath.Clean(outputFilePath)
 
-			// Ensure the directory exists (if not, return an error)
-			dir := filepath.Dir(outputFilePath)
+			// Reject if the cleaned path is a directory traversal
+			if cleanPath == ".." || strings.HasPrefix(cleanPath, ".."+string(os.PathSeparator)) {
+				return nil, fmt.Errorf("invalid output file path: directory traversal detected")
+			}
+
+			// Get absolute path
+			absPath := outputFilePath
+			if !filepath.IsAbs(outputFilePath) {
+				cwd, _ := os.Getwd()
+				absPath = filepath.Join(cwd, outputFilePath)
+			}
+			absPath = filepath.Clean(absPath)
+
+			// Ensure the directory exists
+			dir := filepath.Dir(absPath)
 			if _, err := os.Stat(dir); os.IsNotExist(err) {
 				return nil, fmt.Errorf("directory %s does not exist", dir)
 			}
 
-			// Try to create the output file
-			if strings.Contains(outputFilePath, "..") || filepath.IsAbs(outputFilePath) {
-				return nil, fmt.Errorf("invalid output file path")
-			}
-			outputFile, err := os.Create(outputFilePath)
+			outputFile, err := os.Create(absPath)
 			if err != nil {
-				return nil, fmt.Errorf("unable to create output file %s: %v", outputFilePath, err)
+				return nil, fmt.Errorf("unable to create output file %s: %v", absPath, err)
 			}
-
-			// Return the created file pointer
 			return outputFile, nil
 		}
 	}
-	// Return nil and no error if no output argument is found
-	return nil, nil
+	return nil, nil // No output file specified
 }
