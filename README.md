@@ -28,14 +28,14 @@ You can run Cchecker from the command line with the following syntax:
 ./ccheck <pattern> <root> <file_extension> <flags>
 ```
 
-- `<pattern>`: The keyword or phrase you want to check for.
+- `<pattern>`: The keyword or phrase you want to check for, can be multiple words, separated by a comma. Prefix with `re:` to treat it as a regex pattern.
 - `<root>`: The root directory to start the check.
-- `<file_extension>`: The file extension to filter files (use "*" for all files).
+- `<file_extension>`: The file extension to filter files (use "*" for all files, separate by a comma for multiple file extentions).
 - `<flags>`: Optional flags for additional functionality. Currently only supports -i for case-insensitive search and -o=<file_path> for saving the result to a file.
 
 Example:
 ```bash
-./ccheck "TODO" ~/Coding ".go" -i
+./ccheck "TODO, re:^func" ~/Coding ".go, .rs" -i -o=output.txt
 ```
 or
 ```bash
