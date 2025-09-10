@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseArgs() (pattern []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
+func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
 	if len(os.Args) < 4 {
 		fmt.Println(PrintError("not enough arguments", "at least 3 arguments required"))
 		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
@@ -20,7 +20,7 @@ func ParseArgs() (pattern []*regexp.Regexp, root string, extList []string, outpu
 		fmt.Println(PrintError(err.Error(), "valid output file argument"))
 		os.Exit(1)
 	}
-	var s []*regexp.Regexp
+
 	patternsArg := os.Args[1]
 	patternList := strings.SplitSeq(patternsArg, ",")
 	for patternsArg := range patternList {
@@ -38,14 +38,14 @@ func ParseArgs() (pattern []*regexp.Regexp, root string, extList []string, outpu
 				fmt.Println(PrintError(err.Error(), "valid regex"))
 				os.Exit(1)
 			}
-			s = append(s, re)
+			patterns = append(patterns, re)
 		} else {
 			// Literal search
 			literal := regexp.QuoteMeta(patternsArg)
 			if !case_sensitive {
 				literal = "(?i)" + literal
 			}
-			s = append(s, regexp.MustCompile(literal))
+			patterns = append(patterns, regexp.MustCompile(literal))
 		}
 	}
 
@@ -69,5 +69,5 @@ func ParseArgs() (pattern []*regexp.Regexp, root string, extList []string, outpu
 	}
 
 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
-	return s, root, extList, outputFile
+	return patterns, root, extList, outputFile
 }
