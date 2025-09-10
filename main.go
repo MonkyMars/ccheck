@@ -20,19 +20,18 @@ var (
 
 func main() {
 	fmt.Println("ccheck 2.1.0")
-	pattern, root, extList, outputFile := handling.ParseArgs()
+	patterns, root, extList, outputFile := handling.ParseArgs()
 
+	// Start timer
 	startTime := time.Now()
 
 	var wg sync.WaitGroup
 	var outputWg sync.WaitGroup
 
-	// Use outputWg to track the file output goroutine
-	outputWg.Add(1)
-	go func() {
-		defer outputWg.Done()
+	// Start a goroutine to handle output
+	outputWg.Go(func() {
 		handling.OutputToFile(outputFile, results)
-	}()
+	})
 
 	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -88,10 +87,13 @@ func main() {
 
 			for scanner.Scan() {
 				line := scanner.Text()
-				if pattern.MatchString(line) {
-					message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
-					results <- message
-					resultsLen++
+				for _, p := range patterns {
+					if p.MatchString(line) {
+						message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
+						results <- message
+						resultsLen++
+						break // No need to check other patterns if one matches
+					}
 				}
 				lineNum++
 			}
