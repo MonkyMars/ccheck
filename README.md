@@ -22,6 +22,13 @@ go build -o ccheck .
 
 The cchecker binary will be created in the current directory.
 
+or install via the Go
+```bash
+go install github.com/MonkyMars/ccheck
+```
+
+> Make sure to add Go to your PATH.
+
 ## Usage
 You can run Cchecker from the command line with the following syntax:
 ```bash
@@ -48,8 +55,8 @@ Cchecker x.y.z
 /home/monky/Coding/go/check/main.go:68: 	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
 ```
 
-> Note:
-- Be careful with setting the root directory to something too broad. For example, using ~/ as the root, will check all your package files too. node_modules for javascript and target for rust are already filtered out by default. You can modify the code to add more directories to ignore if needed.
+
+> Be careful with setting the root directory to something too broad. For example, using ~/ as the root, will check all your package files too. node_modules for javascript and target for rust are already filtered out by default. You can modify the code to add more directories to ignore if needed.
 
 ## Contributing
 Contributions are welcome! If you find a bug or have a feature request, please open an issue. If you'd like to contribute code, feel free to fork the repository and submit a pull request.
