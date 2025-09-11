@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/MonkyMars/ccheck/handling"
 	"github.com/MonkyMars/ccheck/validate"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
