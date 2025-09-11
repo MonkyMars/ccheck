@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ccheck/validate"
+	"github.com/MonkyMars/ccheck/validate"
 	"testing"
 )
 

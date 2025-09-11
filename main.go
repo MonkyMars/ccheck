@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"ccheck/handling"
-	"ccheck/validate"
+	"github.com/MonkyMars/ccheck/handling"
+	"github.com/MonkyMars/ccheck/validate"
 	"fmt"
 	"io/fs"
 	"path/filepath"
