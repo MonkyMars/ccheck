@@ -14,8 +14,14 @@ func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outp
 		os.Exit(1)
 	}
 
+	// Check for help flag, if present, display help and exit
+	if HandleHelpArg(os.Args[4:]) {
+		return nil, "", nil, nil
+	}
+
 	case_sensitive := HandleCaseSensitivityArg()
 	outputFile, err := HandleOutputFileArg(os.Args[4:])
+
 	if err != nil {
 		fmt.Println(PrintError(err.Error(), "valid output file argument"))
 		os.Exit(1)
