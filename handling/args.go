@@ -9,7 +9,7 @@ import (
 
 func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
 	// Check for help flag, if present, display help and exit
-	if HandleHelpArg(os.Args[4:]) {
+	if HandleHelpArg(os.Args) {
 		return nil, "", nil, nil
 	}
 
