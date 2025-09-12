@@ -3,6 +3,7 @@ package handling
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"unicode/utf8"
 )
 
@@ -32,8 +33,7 @@ func IsBinaryFile(file *os.File) bool {
 }
 
 func OpenFile(path string) (*os.File, error) {
-	// #nosec G304: Path is validated to be inside the root directory
-	file, err := os.Open(path)
+	file, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}

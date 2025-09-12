@@ -3,13 +3,15 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/MonkyMars/ccheck/handling"
-	"github.com/MonkyMars/ccheck/validate"
 	"io/fs"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/MonkyMars/ccheck/handling"
+	"github.com/MonkyMars/ccheck/terminal"
+	"github.com/MonkyMars/ccheck/validate"
 )
 
 var (
@@ -19,7 +21,7 @@ var (
 )
 
 func main() {
-	fmt.Println("ccheck 2.1.0")
+	fmt.Println("ccheck 2.1.1")
 	patterns, root, extList, outputFile := handling.ParseArgs()
 
 	// Start timer
@@ -53,6 +55,7 @@ func main() {
 				break
 			}
 		}
+
 		if !matches {
 			return nil
 		}
@@ -72,8 +75,8 @@ func main() {
 		go func(path string) {
 			defer wg.Done()
 
-			// #nosec G304: Path is validated to be inside the root directory
-			file, err := handling.OpenFile(path)
+			file, err := handling.OpenFile(filepath.Clean(path))
+			// Check for errors and nil file
 			if err != nil || file == nil {
 				if err.Error() != "binary file" {
 					fmt.Println(handling.PrintError(err.Error(), "file should be accessible"))
@@ -82,6 +85,7 @@ func main() {
 			}
 			defer file.Close()
 
+			// Read file line by line
 			scanner := bufio.NewScanner(file)
 			lineNum := 1
 
@@ -89,10 +93,16 @@ func main() {
 				line := scanner.Text()
 				for _, p := range patterns {
 					if p.MatchString(line) {
-						message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
-						results <- message
-						resultsLen++
-						break // No need to check other patterns if one matches
+						if outputFile != nil {
+							message := fmt.Sprintf("%s:%d: %s\n", path, lineNum, line)
+							results <- message
+							resultsLen++
+						} else {
+							message := terminal.FormatMatchLine(path, lineNum, line, p)
+							results <- message + "\n"
+							resultsLen++
+						}
+						// Do not break for loop; another pattern might also match
 					}
 				}
 				lineNum++
