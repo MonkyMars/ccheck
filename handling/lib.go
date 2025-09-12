@@ -51,3 +51,21 @@ func HandleOutputFileArg(args []string) (*os.File, error) {
 	}
 	return nil, nil // No output file specified
 }
+
+func HandleHelpArg(args []string) bool {
+	for _, arg := range args {
+		if arg == "-h" || arg == "--help" {
+			fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
+			fmt.Println("Arguments:")
+			fmt.Println("  <pattern|re:regex> : Comma-separated list of literal patterns or regex (prefix with re:)")
+			fmt.Println("  <root_dir>        : Root directory to search")
+			fmt.Println("  <ext>             : Comma-separated list of file extensions to include")
+			fmt.Println("Flags:")
+			fmt.Println("  -i                : Case insensitive search")
+			fmt.Println("  -o=output.txt    : Specify output file")
+			fmt.Println("  -h, --help       : Show this help message")
+			os.Exit(0)
+		}
+	}
+	return false
+}
