@@ -8,15 +8,15 @@ import (
 )
 
 func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
+	// Check for help flag, if present, display help and exit
+	if HandleHelpArg(os.Args[4:]) {
+		return nil, "", nil, nil
+	}
+
 	if len(os.Args) < 4 {
 		fmt.Println(PrintError("not enough arguments", "at least 3 arguments required"))
 		fmt.Println("Usage: go run main.go <pattern|re:regex> <root_dir> <ext> <flags>")
 		os.Exit(1)
-	}
-
-	// Check for help flag, if present, display help and exit
-	if HandleHelpArg(os.Args[4:]) {
-		return nil, "", nil, nil
 	}
 
 	case_sensitive := HandleCaseSensitivityArg()
