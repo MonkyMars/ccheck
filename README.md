@@ -22,7 +22,7 @@ go build -o ccheck .
 
 The cchecker binary will be created in the current directory.
 
-or install via the Go
+or install via Go directly:
 ```bash
 go install github.com/MonkyMars/ccheck
 ```
