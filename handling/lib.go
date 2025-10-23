@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// HandleCaseSensitivityArg checks for the presence of the -i flag in the command-line arguments
 func HandleCaseSensitivityArg() bool {
 	return !slices.Contains(os.Args[4:], "-i")
 }
 
+// HandleOutputFileArg processes the -o=output.txt argument to create and return an output file
 func HandleOutputFileArg(args []string) (*os.File, error) {
 	for _, arg := range args {
 		if strings.HasPrefix(arg, "-o") {
@@ -52,6 +54,7 @@ func HandleOutputFileArg(args []string) (*os.File, error) {
 	return nil, nil // No output file specified
 }
 
+// HandleHelpArg checks for -h or --help flags and displays usage information
 func HandleHelpArg(args []string) bool {
 	for _, arg := range args {
 		if arg == "-h" || arg == "--help" {

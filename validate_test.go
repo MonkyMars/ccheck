@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/MonkyMars/ccheck/validate"
 	"testing"
+
+	"github.com/MonkyMars/ccheck/validate"
 )
 
 func TestIsValidExt(t *testing.T) {
@@ -17,7 +18,7 @@ func TestIsValidExt(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := validate.Is_valid_ext(tt.file, tt.ext)
+		result := validate.IsValidExtension(tt.file, tt.ext)
 		if result != tt.expected {
 			t.Errorf("isValidExt(%q, %q) = %v; want %v", tt.file, tt.ext, result, tt.expected)
 		}
@@ -36,7 +37,7 @@ func TestIsValidDir(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := validate.Is_valid_dir(tt.dir, blacklistedDirs)
+		result := validate.IsValidDir(tt.dir, blacklistedDirs)
 		if result != tt.expected {
 			t.Errorf("isValidDir(%q) = %v; want %v", tt.dir, result, tt.expected)
 		}

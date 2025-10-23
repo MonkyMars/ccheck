@@ -15,13 +15,16 @@ import (
 )
 
 var (
-	blacklistedDirs = []string{"node_modules", "target", ".git"}
-	results         = make(chan string)
-	resultsLen      = 0
+	blacklistedDirs = map[string]bool{
+		".git":         true,
+		"node_modules": true,
+		"target":       true,
+	}
+	results    = make(chan string)
+	resultsLen = 0
 )
 
 func main() {
-	fmt.Println("ccheck 2.1.1")
 	patterns, root, extList, outputFile := handling.ParseArgs()
 
 	// Start timer
@@ -42,15 +45,15 @@ func main() {
 		}
 
 		if d.IsDir() {
-			if !validate.Is_valid_dir(path, blacklistedDirs) {
+			if !validate.IsValidDir(path, blacklistedDirs) {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
 		matches := false
-		for _, e := range extList {
-			if validate.Is_valid_ext(d.Name(), e) {
+		for e, _ := range extList {
+			if validate.IsValidExtension(d.Name(), e) {
 				matches = true
 				break
 			}
@@ -78,7 +81,7 @@ func main() {
 			file, err := handling.OpenFile(filepath.Clean(path))
 			// Check for errors and nil file
 			if err != nil || file == nil {
-				if err.Error() != "binary file" {
+				if err.Error() != handling.ErrorBinaryFile.Error() {
 					fmt.Println(handling.PrintError(err.Error(), "file should be accessible"))
 				}
 				return
@@ -121,6 +124,7 @@ func main() {
 	outputWg.Wait()
 
 	elapsed := time.Since(startTime)
+	fmt.Println("ccheck 2.3.0")
 	fmt.Printf("Found %d results in %s\n", resultsLen, elapsed)
 
 	if err != nil {

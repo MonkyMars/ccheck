@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outputFile *os.File) {
+func ParseArgs() (patterns []*regexp.Regexp, root string, extList map[string]bool, outputFile *os.File) {
 	// Check for help flag, if present, display help and exit
 	if HandleHelpArg(os.Args) {
 		return nil, "", nil, nil
@@ -66,14 +66,19 @@ func ParseArgs() (patterns []*regexp.Regexp, root string, extList []string, outp
 	}
 
 	ext := os.Args[3]
-	extList = strings.Split(ext, ",")
-	for i, e := range extList {
-		extList[i] = strings.TrimSpace(e)
-		if !strings.HasPrefix(extList[i], ".") {
-			extList[i] = "." + extList[i]
+	argExtList := strings.Split(ext, ",")
+	extList = make(map[string]bool)
+	for i, e := range argExtList {
+		argExtList[i] = strings.TrimSpace(e)
+		if argExtList[i] == "*" {
+			continue
 		}
+		if !strings.HasPrefix(argExtList[i], ".") {
+			argExtList[i] = "." + argExtList[i]
+		}
+		extList[argExtList[i]] = true
 	}
 
-	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go
+	/// E.g., Pattern: TODO, root: /home/monky/go, ext: .go: true
 	return patterns, root, extList, outputFile
 }

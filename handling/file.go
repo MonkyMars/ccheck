@@ -8,28 +8,26 @@ import (
 )
 
 func IsBinaryFile(file *os.File) bool {
-	buf := make([]byte, 8000)
-	n, err := file.Read(buf)
-	if err != nil {
-		return true // unreadable → assume binary
+	// Check if the file has a file extension commonly associated with binary files
+	ext := filepath.Ext(file.Name())
+	if ext == "" || ext == ".exe" {
+		return true
 	}
-	if n == 0 {
-		return false // empty file → treat as text
+	buf := make([]byte, 512)
+	n, err := file.Read(buf)
+	if err != nil || n == 0 {
+		return false
 	}
 
-	// Look for null bytes
-	for _, b := range buf[:n] {
-		if b == 0 {
+	// Quick null byte check
+	for i := range n {
+		if buf[i] == 0 {
 			return true
 		}
 	}
 
-	// Validate UTF-8
-	if !utf8.Valid(buf[:n]) {
-		return true
-	}
-
-	return false
+	// UTF-8 validation only if needed
+	return !utf8.Valid(buf[:n])
 }
 
 func OpenFile(path string) (*os.File, error) {
@@ -38,9 +36,10 @@ func OpenFile(path string) (*os.File, error) {
 		return nil, err
 	}
 
+	// Check if file is binary, if so, close and return error
 	if IsBinaryFile(file) {
 		_ = file.Close()
-		return nil, fmt.Errorf("binary file")
+		return nil, ErrorBinaryFile
 	}
 
 	// Reset file cursor after binary check
