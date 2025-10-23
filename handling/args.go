@@ -70,7 +70,9 @@ func ParseArgs() (patterns []*regexp.Regexp, root string, extList map[string]boo
 	extList = make(map[string]bool)
 	for i, e := range argExtList {
 		argExtList[i] = strings.TrimSpace(e)
+		fmt.Println("Processing extension:", argExtList[i])
 		if argExtList[i] == "*" {
+			extList["*"] = true
 			continue
 		}
 		if !strings.HasPrefix(argExtList[i], ".") {
