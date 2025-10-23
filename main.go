@@ -124,7 +124,7 @@ func main() {
 	outputWg.Wait()
 
 	elapsed := time.Since(startTime)
-	fmt.Println("ccheck 2.3.0")
+	fmt.Println("ccheck 2.3.1")
 	fmt.Printf("Found %d results in %s\n", resultsLen, elapsed)
 
 	if err != nil {
