@@ -52,7 +52,7 @@ func main() {
 		}
 
 		matches := false
-		for e, _ := range extList {
+		for e := range extList {
 			if validate.IsValidExtension(d.Name(), e) {
 				matches = true
 				break
